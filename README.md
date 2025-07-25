@@ -2,6 +2,8 @@
 
 This project provides a Command Line Interface (CLI) tool for testing your optimization problems (saved in .mps format) in SCIP, HiGHS and cuOpt ([see setup instructions here](cuopt_setup.md)). It includes a FastAPI application for exposing NVIDIA cuOpt capabilities as a service and a **command-line utility (`Solve.py`)** that can interact with this service or directly invoke local SCIP and HiGHS solvers. The design primarily supports solving **MPS (Mathematical Programming System) model files**.
 
+### [NVIDIA cuOpt github repo](https://github.com/NVIDIA/cuopt)
+
 # Features
 
 *   **FastAPI cuOpt Solver Service**: A web service exposing `cuOpt` for solving Linear Programming problems via a REST API.
