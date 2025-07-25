@@ -28,7 +28,11 @@
 3.  Restart your computer after the process is complete.
 4.  After rebooting, the Ubuntu installation will continue. You will be prompted to create a username and password for your new Linux distribution. (You might have been asked to do this in the previous step also)
 #### To verify your installation:
-1.  Open PowerShell and run `wsl -l -v`. You should see your distribution listed with `VERSION` set to 2.
+1.  Open PowerShell and run
+    ```bash
+    wsl -l -v
+    ```
+    You should see your distribution listed with `VERSION` set to 2.
     ```
     PS C:\> wsl -l -v   NAME      STATE           VERSION
     * Ubuntu    Running         2
@@ -59,11 +63,16 @@
     ```bash
     sudo docker pull nvidia/cuopt:latest-cuda12.8-py312
     ```
-2.  Install the NVIDIA Container Toolkit. Follow the steps on the following website (a and b below are the steps I followed on the website): `https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html`
+2.  Install the NVIDIA Container Toolkit. Follow the steps on the following website (a and b below are the steps I followed on the website): [Installing the NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)`
+    
     a) Installation: I used: “With apt: Ubuntu, Debian” steps.
+
     b) Configuration: I used “Configuring Docker”, there were two steps.
 
-3.  Run the Container. This command starts the container, enables GPU access, maps a port to access the Jupyter server, and mounts a local directory for persistent storage of your work. Run the container:
+3.  Run the Container. This command starts the container, enables GPU access, maps a port to access the server, and mounts a local directory for persistent storage of your work. 
+
+    Run the container:
+    
     **IMPORTANT**: Replace “`-v /mnt/c/GitHub/TestCuOpt:/app \`” with the proper location to the REPO (mine is at `C:\GitHub\TestCuOpt`).
     ```bash
     sudo docker run --gpus all -it --rm \
