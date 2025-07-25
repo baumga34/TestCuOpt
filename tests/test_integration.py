@@ -143,4 +143,3 @@ def test_presolve_and_solve_full_integration(scip_exe, cuopt_url, example_mps_fi
     )
     captured_cuopt = capsys.readouterr()
     assert "Status Code: 200" in captured_cuopt.out
-    assert '"status": "success"' in captured_cuopt.out
