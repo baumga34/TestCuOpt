@@ -1,3 +1,5 @@
 *.sol
 .idea/
 *.pyc
+*.log
+presolved.mps

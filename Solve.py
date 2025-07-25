@@ -108,7 +108,6 @@ def execute_scip_command(
             read {input_model_path}
             set limits nodes 0
             set presolving emphasis aggressive
-            set presolving aggregation FALSE
             set presolving maxrounds -1
             set presolving maxrestarts -1
             presolve
