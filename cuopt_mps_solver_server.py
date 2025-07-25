@@ -1,6 +1,8 @@
 import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import numpy as np
+from typing import Optional, List, Dict, Any
 
 # Import the specific modules and classes needed
 from cuopt.linear_programming.cuopt_mps_parser import parser
@@ -28,7 +30,6 @@ from cuopt.linear_programming.solver_settings import (
     PDLPSolverMode,
     SolverMethod,
 )
-import numpy as np
 
 
 # Initialize the FastAPI app
@@ -39,6 +40,18 @@ class MPSRequest(BaseModel):
     file_name: str
     time_limit: float = 1.0
     batch_size: int = 1
+
+class SolverResponse(BaseModel):
+    """
+    Defines the structured response from the solver.
+    It includes core fields and a flexible dictionary for all other details.
+    """
+    # Core fields that should always be present
+    status: str
+    objective_value: Optional[float] = None
+
+    # A flexible "catch-all" dictionary for any other data from the solver
+    details: Dict[str, Any] = {}
 
 # Define the endpoint that will receive the POST request
 @app.post("/solve_mps")
@@ -78,26 +91,52 @@ def solve_from_request(request: MPSRequest):
     # result_obj = linear_programming.Solve(data_model, solver_settings=solver_settings)
     batch_solution, solve_time = linear_programming.BatchSolve(data_model_list, solver_settings)
     result_obj = batch_solution[0]
-    
-    # Dynamically build a dictionary from the result object
-    result = {}
-    for attr_name in dir(result_obj):
-        # Find all getter methods
-        if attr_name.startswith('get_'):
-            method = getattr(result_obj, attr_name)
-            if callable(method):
-                key = attr_name[4:]
-                try:
-                    value = method()
-                    # Convert numpy arrays to lists for JSON serialization
-                    if isinstance(value, np.ndarray):
-                        result[key] = value.tolist()
-                    else:
-                        result[key] = value
-                except AttributeError as e:
-                    # This catches errors for attributes not supported by the solution type (e.g., MILP vs LP)
-                    print(f"Skipping unsupported attribute '{key}': {e}")
-                    pass
 
-    print(f"Solver finished with status: {result.get('status', 'N/A')}")
-    return result
+    # 1. Dynamically build a dictionary of ALL available results.
+    full_result_dict = {}
+    for attr_name in dir(result_obj):
+        if not attr_name.startswith('get_'):
+            continue
+
+        method = getattr(result_obj, attr_name)
+        if not callable(method):
+            continue
+
+        key = attr_name[4:]  # Remove "get_" prefix
+        try:
+            value = method()
+            # Check for basic, JSON-safe types first
+            if isinstance(value, (str, int, float, bool, list, dict, type(None))):
+                full_result_dict[key] = value
+            # Handle numpy arrays specifically
+            elif isinstance(value, np.ndarray):
+                full_result_dict[key] = value.tolist()
+            # For any other complex object, convert it to a string to avoid errors
+            else:
+                print(
+                    f"Warning: Attribute '{key}' returned a non-serializable type ({type(value)}). Converting to string.")
+                full_result_dict[key] = str(value)
+        except AttributeError as e:
+            # This catches errors for attributes not supported by the solution type
+            print(f"Skipping unsupported attribute '{key}': {e}")
+            pass
+
+    # 2. Create the final, structured response object.
+    # The .pop() method removes the key from the dictionary while returning its value.
+    # The remaining items in the dictionary are our flexible 'details'.
+    response_data = SolverResponse(
+        status=full_result_dict.pop('status', 'unknown'),
+        objective_value=full_result_dict.pop('objective_value', None),
+        details=full_result_dict  # Pass the rest of the items to the details field
+    )
+
+    print(f"Solver finished with status: {response_data.status}")
+    return response_data
+
+@app.get("/health", status_code=200)
+def health_check():
+    """
+    A simple health check endpoint that returns a 200 OK status
+    if the server is running. Useful for load balancers and monitoring.
+    """
+    return {"status": "healthy"}
