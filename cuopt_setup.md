@@ -1,4 +1,7 @@
 # Setting up NVIDIA cuOpt with Docker and WSL2
+
+### [NVIDIA cuOpt github repo](https://github.com/NVIDIA/cuopt)
+
 ## This guide provides a walkthrough for setting up and running the NVIDIA cuOpt containerized development environment on a Windows machine using WSL2 (Windows Subsystem for Linux).
 
 ## 1. Introduction
