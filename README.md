@@ -100,20 +100,20 @@ The FastAPI application exposes the `cuOpt` solver via a REST API.
             ```json
             {
               "file_name": "your_model.mps",
-              "time_limit": 10.0,  // Optional, default 1.0 seconds [4]
-              "batch_size": 1      // Optional, default 1 [4]
+              "time_limit": 10.0,  // Optional, default 1.0 seconds
+              "batch_size": 1      // Optional, default 1
             }
             ```
         *   **Response Body (`application/json`)**:
             ```json
             {
-              "status": "success", // or "optimal", "infeasible", etc. [4, 19]
-              "objective_value": 123.45, // Optimal objective value, if found [4, 19]
+              "status": "success", // or "optimal", "infeasible", etc.
+              "objective_value": 123.45, // Optimal objective value, if found
               "details": {
-                "vars": [...],      // Solution variables [20]
+                "vars": [...],      // Solution variables
                 "primal_objective": 123.45,
                 "solve_time": 0.05,
-                // ... other details from cuOpt solver output [4, 13, 19, 21]
+                // ... other details from cuOpt solver output
               }
             }
             ```
